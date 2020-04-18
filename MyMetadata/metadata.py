@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import urllib.parse
+from base64 import b64encode
 from datetime import datetime
 from email.message import EmailMessage
 from http.client import HTTPSConnection
@@ -9,7 +9,7 @@ from ipaddress import ip_address, ip_network
 from json import loads
 from smtplib import SMTP
 from subprocess import check_output
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlencode
 
 from flask import Blueprint, request
 from pymongo import MongoClient
@@ -45,7 +45,7 @@ def metadata(metadata):
         if not allow:
             return '', 403
     if metadata.get('encrypt'):
-        return encrypt(query('key')['value'], str(metadata['value']))
+        return encrypt(b64encode(query('key')['value'].encode()), str(metadata['value']))
     else:
         return str(metadata['value'])
 
@@ -72,7 +72,7 @@ def encrypt(key, plaintext):
     data = {'mode': 'encrypt', 'key': key, 'content': plaintext}
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
     connection = HTTPSConnection(query('encrypt_server')['value'], timeout=10)
-    connection.request('POST', '/do', urllib.parse.urlencode(data), headers)
+    connection.request('POST', '/do', urlencode(data), headers)
     response = connection.getresponse()
     result = loads(response.read())['result']
     connection.close()
