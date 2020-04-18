@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
 import urllib.parse
+from datetime import datetime
+from email.message import EmailMessage
 from http.client import HTTPSConnection
+from io import BytesIO
 from ipaddress import ip_address, ip_network
 from json import loads
+from smtplib import SMTP
+from subprocess import check_output
 from urllib.parse import quote_plus
 
 from flask import Blueprint, request
@@ -15,7 +20,7 @@ bp = Blueprint('metadata', __name__)
 
 
 @bp.route('/<string:metadata>')
-def api(metadata):
+def metadata(metadata):
     remote_addr = ip_address(request.remote_addr)
     verify = query('metadata_verify')
     header = request.headers.get(verify['header'])
@@ -72,3 +77,21 @@ def encrypt(key, plaintext):
     result = loads(response.read())['result']
     connection.close()
     return result
+
+
+def backup():
+    command = f'mongodump -h{MONGO_SERVER}:{MONGO_PORT} -d{DATABASE} -c{COLLECTION} -u{AUTH} -p{PASSWORD} --gzip --archive'
+    attachment = BytesIO()
+    attachment.write(check_output(command, shell=True))
+    config = query('metadata_backup')
+    msg = EmailMessage()
+    msg['Subject'] = f'My Metadata Backup-{datetime.now():%Y%m%d}'
+    msg['From'] = config['sender']
+    msg['To'] = config['subscriber']
+    msg.add_attachment(attachment.getvalue(), maintype='application',
+                       subtype='octet-stream', filename='database')
+    with SMTP(config['smtp_server'], config['smtp_port']) as s:
+        s.starttls()
+        s.login(config['sender'], config['password'])
+        s.send_message(msg)
+    print('Backup My Metadata done.')
