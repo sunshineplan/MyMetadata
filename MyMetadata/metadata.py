@@ -71,7 +71,7 @@ def query(metadata):
 def encrypt(key, plaintext):
     data = {'mode': 'encrypt', 'key': key, 'content': plaintext}
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
-    connection = HTTPSConnection(query('encrypt_server'), timeout=10)
+    connection = HTTPSConnection(query('encrypt_server')['value'], timeout=10)
     connection.request('POST', '/do', urllib.parse.urlencode(data), headers)
     response = connection.getresponse()
     result = loads(response.read())['result']
