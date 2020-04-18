@@ -30,7 +30,7 @@ def metadata(metadata):
     if not metadata or not metadata.get('value'):
         return '', 404
     whitelist = metadata.get('whitelist')
-    if whitelist:
+    if whitelist is not None:
         allow = 0
         if remote_addr == ip_address('127.0.0.1'):
             allow = 1
