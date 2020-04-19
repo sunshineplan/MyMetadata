@@ -8,7 +8,7 @@ METADATA_SERVER = ''
 VERIFY_HEADER = {'header': 'value'}
 
 
-def metadata(metadata, default=None):
+def metadata(metadata, default=None, ERROR_IF_NONE=False):
     for _ in range(3):
         try:
             connection = HTTPSConnection(METADATA_SERVER, timeout=10)
@@ -27,4 +27,7 @@ def metadata(metadata, default=None):
         except:
             return content
     else:
-        return default
+        if ERROR_IF_NONE:
+            raise KeyError
+        else:
+            return default
