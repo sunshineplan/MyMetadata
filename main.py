@@ -4,6 +4,7 @@ import click
 
 from MyMetadata import app
 from MyMetadata.metadata import backup as _backup
+from MyMetadata.query import metadata as _query
 
 
 @click.group(invoke_without_command=True)
@@ -20,6 +21,10 @@ def backup():
     except:
         click.echo('Failed. Please check mail setting.')
 
+@cli.command(short_help='Query metadata')
+@click.argument('metadata')
+def query(metadata):
+    click.echo(_query(metadata))
 
 @cli.command(short_help='Run Server')
 @click.option('--port', '-p', default=80, help='Listening Port')
