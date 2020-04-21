@@ -9,31 +9,9 @@ from smtplib import SMTP
 from subprocess import check_output
 from urllib.parse import quote_plus
 
-from flask import Flask, request
 from pymongo import MongoClient
 
 from metadata._util import encrypt
-
-app = Flask('metadata')
-
-
-@app.route('/<string:metadata>')
-def api(metadata):
-    return Metadata(
-        app.config['SERVER'],
-        app.config['PORT'],
-        app.config['DATABASE'],
-        app.config['COLLECTION'],
-        app.config['USER'],
-        app.config['PASSWORD']
-    ).get_value(metadata, request)
-
-
-@app.route('/')
-@app.route('/<path:dummy>')
-def fallback(dummy=None):
-    return '', 403
-
 
 
 class Metadata:
@@ -44,7 +22,6 @@ class Metadata:
         self.col = collection
         self.user = user
         self.pwd = pwd
-        self.app = app
 
     def query(self, metadata):
         if self.user:
@@ -107,12 +84,3 @@ class Metadata:
             s.login(sender, pwd)
             s.send_message(msg)
         print('Backup My Metadata done.')
-
-    def run(self, host='0.0.0.0', port=80, debug=False):
-        self.app.config['SERVER'] = self.server
-        self.app.config['PORT'] = self.port
-        self.app.config['DATABASE'] = self.db
-        self.app.config['COLLECTION'] = self.col
-        self.app.config['USER'] = self.user
-        self.app.config['PASSWORD'] = self.pwd
-        self.app.run(host=host, port=port, debug=debug)

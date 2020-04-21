@@ -3,13 +3,14 @@
 import click
 
 from metadata._base import Metadata
+from metadata.server import app
 
 options = [
     click.option('--server', '-s', default='localhost', help='Mongo Server'),
     click.option('--port', '-P', default=27017, help='Mongo Server Port'),
     click.option('--database', '-d', default='metadata', help='Database'),
     click.option('--collection', '-c', default='metadata', help='Collection'),
-    click.option('--user', '-u', help='Mongodb User'),
+    click.option('--user', '-u', default='metadata', help='Mongodb User'),
     click.option('--pwd', '-p', help='Mongodb User Password')
 ]
 
@@ -56,8 +57,13 @@ def backup(server, port, database, collection, user, pwd, sender, password, subs
 @click.option('--listen-port', default=80, help='Listening Port')
 @click.option('--debug', is_flag=True)
 def run(server, port, database, collection, user, pwd, host, listen_port, debug):
-    Metadata(server, port, database, collection, user, pwd).run(
-        host, listen_port, debug)
+    app.config['SERVER'] = server
+    app.config['PORT'] = port
+    app.config['DATABASE'] = database
+    app.config['COLLECTION'] = collection
+    app.config['USER'] = user
+    app.config['PASSWORD'] = pwd
+    app.run(host, listen_port, debug)
 
 
 def main():

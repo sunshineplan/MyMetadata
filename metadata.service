@@ -1,0 +1,10 @@
+[Unit]
+Description=uWSGI instance to serve MyMetadata
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/uwsgi --ini /var/www/MyMetadata/MyMetadata.ini
+WorkingDirectory=/var/www/MyMetadata
+
+[Install]
+WantedBy=multi-user.target
