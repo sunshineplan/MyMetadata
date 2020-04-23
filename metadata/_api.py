@@ -11,7 +11,7 @@ VERIFY_HEADER = {'header': 'value'}
 def metadata(metadata, default=None, ERROR_IF_NONE=False):
     for _ in range(3):
         try:
-            connection = HTTPSConnection(METADATA_SERVER, timeout=5)
+            connection = HTTPSConnection(METADATA_SERVER, timeout=10)
             connection.request('GET', f'/{metadata}', headers=VERIFY_HEADER)
             response = connection.getresponse()
             status = response.status
