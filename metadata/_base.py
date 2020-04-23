@@ -5,6 +5,7 @@ from datetime import datetime
 from email.message import EmailMessage
 from io import BytesIO
 from ipaddress import ip_address, ip_network
+from json import dumps
 from smtplib import SMTP
 from subprocess import check_output
 from urllib.parse import quote_plus
@@ -58,13 +59,15 @@ class Metadata:
                     return '', 500
             if not allow:
                 return '', 403
+        value = dumps(metadata['value'])
         if metadata.get('encrypt'):
             try:
-                return encrypt(b64encode(self.query('key')['value'].encode()), str(metadata['value']))
+                key = b64encode(self.query('key')['value'].encode()).decode()
+                return encrypt(key, value)
             except:
-                return b64encode(str(metadata['value']).encode())
+                return b64encode(value.encode())
         else:
-            return str(metadata['value'])
+            return value
 
     def backup(self, sender, pwd, subscriber, smtp, port=587):
         if self.user:
