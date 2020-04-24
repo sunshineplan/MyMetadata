@@ -7,9 +7,25 @@ installSoftware() {
 installMyMetadata() {
     mkdir -p /var/log/uwsgi
     pip3 install -e git+https://github.com/sunshineplan/MyMetadata.git#egg=metadata --src /var/www
+    read -p 'Please enter mongo server address:' server
+    read -p 'Please enter mongo server port:' port
+    read -p 'Please enter database:' database
+    read -p 'Please enter collection:' collection
+    read -p 'Please enter username:' username
+    read -sp 'Please enter password:' password
+    cat >/var/www/metadata/metadata/config.py <<-EOF
+		SERVER = '$server'
+		PORT = $port
+		DATABASE = '$database'
+		COLLECTION = '$collection'
+		USER = '$username'
+		PASSWORD = '$password'
+		EOF
 }
 
 setupMyMetadata() {
+    read -p 'Please enter verify header:' header
+    read -p 'Please enter verify header value:' value
     sed -i "s/\$domain/$domain/" /var/www/metadata/metadata/_api.py
     sed -i "s/\$header/$header/" /var/www/metadata/metadata/_api.py
     sed -i "s/\$value/$value/" /var/www/metadata/metadata/_api.py
@@ -53,8 +69,6 @@ setupNGINX() {
 
 main() {
     read -p 'Please enter domain:' domain
-    read -p 'Please enter verify header:' header
-    read -p 'Please enter verify header value:' value
     installSoftware
     installMyMetadata
     setupsystemd
