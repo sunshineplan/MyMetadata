@@ -4,6 +4,7 @@ import click
 
 from metadata._base import Metadata
 from metadata.server import app
+from metadata._api import backup as _backup
 
 options = [
     click.option('--server', '-s', default='localhost', help='Mongo Server'),
@@ -37,16 +38,9 @@ def query(server, port, database, collection, user, pwd, metadata):
 
 
 @cli.command(short_help='Backup Database')
-@add_options(options)
-@click.option('--sender', help='Backup Sender')
-@click.option('--smtp', help='Backup SMTP Server')
-@click.option('--smtp-port', default=587, help='Backup SMTP Server Port')
-@click.option('--password', help='Backup Sender Password')
-@click.option('--subscriber', help='Backup Subscriber')
-def backup(server, port, database, collection, user, pwd, sender, password, subscriber, smtp, smtp_port):
+def backup():
     try:
-        Metadata(server, port, database, collection, user, pwd).backup(
-            sender, password, subscriber, smtp, smtp_port)
+        _backup()
     except:
         click.echo('Failed. Please check mail setting.')
 
@@ -63,7 +57,7 @@ def run(server, port, database, collection, user, pwd, host, listen_port, debug)
     app.config['COLLECTION'] = collection
     app.config['USER'] = user
     app.config['PASSWORD'] = pwd
-    app.run(host, listen_port, debug)
+    app.run(host=host, port=listen_port, debug=debug)
 
 
 def main():

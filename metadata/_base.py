@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 from base64 import b64encode
-from datetime import datetime
-from email.message import EmailMessage
-from io import BytesIO
 from ipaddress import ip_address, ip_network
 from json import dumps
-from smtplib import SMTP
-from subprocess import check_output
+
 from urllib.parse import quote_plus
 
 from pymongo import MongoClient
 
-from metadata._util import encrypt
+try:
+    from ste import encrypt
+except:
+    def encrypt(_, value):
+        return b64encode(value.encode())
 
 
 class Metadata:
@@ -68,22 +68,3 @@ class Metadata:
                 return b64encode(value.encode())
         else:
             return value
-
-    def backup(self, sender, pwd, subscriber, smtp, port=587):
-        if self.user:
-            command = f'mongodump -h{self.server}:{self.port} -d{self.db} -c{self.col} -u{self.user} -p{self.pwd} --gzip --archive'
-        else:
-            command = f'mongodump -h{self.server}:{self.port} -d{self.db} -c{self.col} --gzip --archive'
-        attachment = BytesIO()
-        attachment.write(check_output(command, shell=True))
-        msg = EmailMessage()
-        msg['Subject'] = f'My Metadata Backup-{datetime.now():%Y%m%d}'
-        msg['From'] = sender
-        msg['To'] = subscriber
-        msg.add_attachment(attachment.getvalue(), maintype='application',
-                           subtype='octet-stream', filename='database')
-        with SMTP(smtp, port) as s:
-            s.starttls()
-            s.login(sender, pwd)
-            s.send_message(msg)
-        print('Backup My Metadata done.')
