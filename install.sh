@@ -71,6 +71,7 @@ main() {
     read -p 'Please enter domain:' domain
     installSoftware
     installMyMetadata
+    setupMyMetadata
     setupsystemd
     writeLogrotateScrip
     createCronTask
