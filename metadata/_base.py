@@ -3,7 +3,7 @@
 from base64 import b64encode
 from ipaddress import ip_address, ip_network
 from json import dumps
-
+from socket import gethostbyname
 from urllib.parse import quote_plus
 
 from pymongo import MongoClient
@@ -50,13 +50,18 @@ class Metadata:
             if remote_addr == ip_address('127.0.0.1'):
                 allow = 1
             else:
-                try:
-                    for IP_or_CIDR in whitelist:
-                        if remote_addr in ip_network(IP_or_CIDR):
-                            allow = 1
-                            break
-                except:
-                    return '', 500
+                for i in whitelist:
+                    try:
+                        ip = gethostbyname(i)
+                    except:
+                        ip = i
+                    try:
+                        allow_range = ip_network(ip)
+                    except:
+                        continue
+                    if remote_addr in allow_range:
+                        allow = 1
+                        break
             if not allow:
                 return '', 403
         value = dumps(metadata['value'])

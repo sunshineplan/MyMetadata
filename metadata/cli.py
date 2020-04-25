@@ -2,9 +2,9 @@
 
 import click
 
+from metadata._api import backup as _backup
 from metadata._base import Metadata
 from metadata.server import app
-from metadata._api import backup as _backup
 
 options = [
     click.option('--server', '-s', default='localhost', help='Mongo Server'),
