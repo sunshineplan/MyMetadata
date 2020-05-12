@@ -1,7 +1,12 @@
 #! /bin/bash
 
 installSoftware() {
-    apt -qq -y install python3-flask python3-click python3-pymongo python3-pip uwsgi-plugin-python3 nginx git
+    curl https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+    cat >>/etc/apt/sources.list.d/sunshine.list <<-EOF
+		deb http://repo.mongodb.org/apt/debian $(lsb_release -sc)/mongodb-org/4.2 main
+		EOF
+    apt -qq update
+    apt -qq -y install python3-flask python3-click python3-pymongo python3-pip uwsgi-plugin-python3 nginx git mongodb-org-tools
 }
 
 installMyMetadata() {
@@ -13,6 +18,7 @@ installMyMetadata() {
     read -p 'Please enter collection:' collection
     read -p 'Please enter username:' username
     read -sp 'Please enter password:' password
+    echo
     cat >/var/www/metadata/metadata/config.py <<-EOF
 		SERVER = '$server'
 		PORT = $port
@@ -53,11 +59,7 @@ writeLogrotateScrip() {
 }
 
 createCronTask() {
-    cat >/etc/cron.monthly/BackupMyMetadata <<-EOF
-	#! /bin/bash
-
-	metadata backup
-	EOF
+    cp -s /var/www/metadata/BackupMyMetadata /etc/cron.monthly
     chmod +x /etc/cron.monthly/BackupMyMetadata
 }
 
